@@ -90,3 +90,20 @@ Para eso podemos recibir un solo parametro que sea un objeto, entre llaves envia
 
 ```
 
+# 4 pilares de la programación orientada a obj #
+---
+
+- Abstraccioón
+- Encapsulamiento
+
+## Qué es la abstracción ##
+---
+
+Ya lo estuvimos haciendo el los ejemplos anteiores, es reutilizar codigo, crear moldes, por ej: codear la clase **auto** con las propiedades ***marca, modelo, motor, puertas, etc*** cosas que comparte con otros autos. Luego crear sus instancias, dandole los argumentos propios que los hacen unicos
+
+## encapsulamiento ##
+---
+
+- Esconder métodos y atributos
+- No permitir la alteración de métodos y atributos 
+
