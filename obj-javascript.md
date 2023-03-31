@@ -311,6 +311,7 @@ La herencia es crear super moldes, prototipos madre, clases que sean la base de 
         name: 'curso definitivo de html y css',
     })
 
+
     const juan = new freeStudent({
         name: 'juan',
         lastName: 'perez',
@@ -323,6 +324,93 @@ La herencia es crear super moldes, prototipos madre, clases que sean la base de 
         puntos: 280,
         rank: 3050,
     })
+    const thiago = new expertStudent({
+        name: 'thiago',
+        lastName: 'velazquez',
+        puntos: 500,
+        rank: 1050,
+    })
 
 ```
 
+## qué es polimorfismo ##
+
+### tipos de polimorfismos ###
+
+- sobrecarga
+- paramétrico
+- inclusión
+
+En javascript solo se puede aplicar el polimorfismo de **inclusión** que nos permite sobreescribir el atributo o metodo heredado de la super clase
+
+```js
+
+    class student {
+        constructor ({
+            name,
+            lastName,
+            rank,
+            puntos,
+            course = [],
+            appraveCourses = []
+        }) {
+            this.name = name;
+            this.lastName = lastName;
+            this.rank = rank;
+            this.puntos = puntos;
+            this.course = course;
+            this.appraveCourses = appraveCourses
+        }
+        publicarComentario(comentContent) {
+            const comment = new comment({
+                content: comentContent,
+                studentName: this.name,
+            });
+            comment.publicar()
+        }
+    }
+
+    class comment {
+        constructor({
+            content,
+            studentName,
+            studentRole = 'estudiante'
+        }) {
+            this.content = content;
+            this.studentName = studentName;
+            this.studentRole = studentRole;
+            this.like = 0
+        }
+
+        publicar () {
+            console.log(this.studentName + '(' + this.studentRole + ')');
+            console.log(this.like + ' likes');
+            console.log(this.content);
+        }
+    }
+
+    class teacherStudent extends student {
+        constructor(props) {
+            super(props)
+        }
+        appraveCourse(newCourse) {
+            this.appraveCourses.push(newCourse)
+        }
+        publicarComentario(comentContent) {
+            const commentario = new comment({
+                content: comentContent,
+                studentName: this.name,
+                studentRole: 'profesor'
+            });
+            commentario.publicar()
+        }
+    }
+
+    const freddy = new teacherStudent({
+        name: 'freddy',
+        lastName: 'DC',
+        puntos: 280,
+        rank: 3050,
+    })
+
+```
