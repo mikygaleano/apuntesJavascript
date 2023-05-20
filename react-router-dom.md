@@ -381,3 +381,365 @@ navigate('/', { replace: true });
 
 ```
 Esto me parece útil para el registro, login y logout. Imagina que estás en los 2000, en un cybercafé, cierras tu sesión y te vas, luego llega otra persona le da “atrás” y tenga acceso a tu cuenta !
+
+___
+
+## Outlet: nested routes ##
+
+Outlet es el componente que nos permite trabajar con nested routes. Nested es como se define a las cosas que están dentro de otras, por ejemplo, en CSS cuando creamos selectores y propiedades dentro de otros selectores y propiedades.
+
+Lo mismo pasa con las nested routes, son rutas dentro de otras rutas hijas de una ruta madre.
+
+Esto nos sirve para que React nos permita renderizar más de una ruta a la vez, teniendo una ruta dentro de otra ruta madre, y esto se puede hacer varias veces.
+
+Para hacer estos nested routes debemos crear un componente que contenga otro, de hecho haciendo esto nos podemos evitar tener que poner toda la ruta sino que se concatenan:
+
+```js
+// ❌
+<Route path='/blog' element={<BlogPage />}>
+  <Route path='/blog/:slug' element={<BlogPost />} />
+</Route>
+
+// ✔️
+<Route path='/blog' element={<BlogPage />}>
+  <Route path=':slug' element={<BlogPost />} />
+</Route>
+
+```
+
+Aquí es cuando entra nuestro Outlet, lo debemos importar y usarlo en nuestra ruta.
+
+Si probamos el código cambiará el hash pero no el contenido, entonces lo que debemos hacer es insertar la etiqueta Outlet dentro del componente madre ya que dentro de este se renderizará la información que tenga el componente hijo:
+
+```js
+import { Link, Outlet } from 'react-router-dom';
+...
+
+function BlogPage() {
+  return (
+    <>
+      <h1>Blog</h1>
+
+            {
+                /* Esta etiqueta es donde aparecerá renderizado el componente 
+                hijo */
+            }
+      <Outlet /> // <--
+
+      <ul>
+        {blogdata.map( post => (
+          <BlogLink key={post.slug} post={post} />
+        ))}
+      </ul>
+    </>
+  );
+}
+
+```
+En este momento si usamos la aplicación veremos que tenemos el contenido deBlogPost dentro del contenido de BlogPage dependiendo de donde coloquemos la etiqueta de Outlet.
+
+Así usamos rutas dentro de otras rutas sin perder el contenido de la ruta principal.
+
+___
+
+## useAuth: login y logout ##
+
+Ahora vamos a aprender como desplegar contenido en base a la Autenticación de usuarios, ósea que no todo el contenido de una aplicación va a ser público pata todos los usuarios, sino que tengamos algunas rutas privadas para personas que no se hayan autenticado, ósea hecho login y así mismo no mostrar contenido que es innecesario para personas que ya están registradas, como el mismo registro de usuario o contenido introductorio.
+
+Vamos a hacer contenido que dependiendo el usuario se muestre o no se muestre, y también permitir tener privilegios o permisos dependiendo del rol que tengas.
+
+Vamos entonces a crear nuevas rutas que nos permitan hacer todo esto:
+
+```js
+import { LoginPage } from './Components/Routes/LoginPage/LoginPage';
+import { LogoutPage } from './Components/Routes/LogoutPage/LogoutPage';
+
+function App() {
+  return (
+    <>
+      <HashRouter>
+				<Routes>
+	        ...
+          
+          <Route path='/login' element={<LoginPage />} /> 
+          <Route path='/logout' element={<LogoutPage />} />
+          <Route path='/profile' element={<ProfilePage />} />
+
+        </Routes>
+      </HashRouter>
+    </>
+  )
+}
+
+```
+
+Y debemos crear nuestros respectivos componentes:
+
+LoginPage.js
+
+```js
+import React from 'react';
+
+function LoginPage() {
+  /* Para manejar el registro de usuario con el formilario haremos 
+  uso del estado de React */
+  const [username, setUsername] = React.useState('');
+
+  /* Esta es la función que se ejecutará cuando ocurra el evento de 
+  Submit */
+  const login = (e) => {
+    e.preventDefault();
+  }
+
+  // Aquí creamos un formulario para poder auteticarnos
+  return (
+    <>
+      <h1>Login</h1>
+
+      <form onSubmit={login}>
+        <label>Escribe tu nombre de usuario</label>
+        <input
+          value={username}
+          onChange={ e => setUsername(e.target.value)}
+        />
+
+        <button type="submit">Entrar</button>
+
+      </form>
+    </>
+  );
+}
+
+export { LoginPage }
+
+```
+
+LogoutPage.js
+
+```js
+import React from 'react';
+
+function LogoutPage() {
+  const logout = (e) => {
+    e.preventDefault();
+  }
+
+  return (
+    <>
+      <h1>Logout</h1>
+
+      <form onSubmit={logout}>
+        <label>¿Segurx de que quieres salir?</label>
+
+        <button type="submit">Salir</button>
+
+      </form>
+    </>
+  );
+}
+
+export { LogoutPage }
+
+```
+
+En nuestro Menu.js vamos a crear dos nuevas rutas en nuestro Array routes:
+
+```js
+...
+const routes = [];
+
+...
+routes.push({
+  to: '/login',
+  text: 'Logout'
+});
+routes.push({
+  to: '/logout',
+  text: 'Login'
+});
+
+```
+
+Si lo pensamos bien, no nos debería salir el componente Profile y Logout sin antes haber hecho un Login, vamos a trabajar entonces en esa lógica creando un archivo de autenticación:
+
+auth.js
+
+```js
+import React from 'react';
+
+const AuthContext = React.createContext();
+
+function AuthProvider({ children }) {
+  const auth = {
+    user,
+    login,
+    logout,
+  }
+
+  return (
+    <AuthContext.Provider
+      value={auth}
+    >
+      {children}
+    </AuthContext.Provider>
+  )
+}
+
+function useAuth() {
+  const auth = React.useContext(AuthContext);
+  return auth;
+}
+
+export {
+  AuthProvider,
+  useAuth,
+}
+
+```
+
+Vamos a importar esta lógica al App.js:
+
+```js
+...
+import { AuthProvider, useAuth } from './Components/auth/auth'
+
+function App() {
+  return (
+    <>
+      {/* En este caso AuthProvider tiene que ir dentro de 
+      HastRouter en caso de que AuthProvider necesite de algún 
+      método o contenido que pueda proveer HashRouter */}
+      <HashRouter>
+        <AuthProvider>
+          <Menu />
+
+          <Routes>
+            <Route path='/' element={<HomePage />} />
+            <Route path='/blog' element={<BlogPage />}>
+              <Route path=':slug' element={<BlogPost />} />
+            </Route>
+            
+            <Route path='/login' element={<LoginPage />} />
+            <Route path='/logout' element={<LogoutPage />} />
+            <Route path='/profile' element={<ProfilePage />} />
+
+            <Route path='/*' element={<p>Not Found</p>} />
+
+          </Routes>
+        </AuthProvider>
+
+      </HashRouter>
+    </>
+  )
+}
+
+...
+
+```
+
+En este punto, en LoginPage.js ya podemos empezar a utilizar nuestro useAuth:
+
+```js
+import { useAuth } from '../../auth/auth';
+...
+
+function LoginPage() {
+  const auth = useAuth();
+	...
+}
+
+```
+
+Vamos de nuevo auth.js y seguimos con la lógica:
+
+```js
+...
+function AuthProvider({ children }) {
+  /* Siguiendo la lógica, si user es null significa que no estamos 
+  autenticados */
+  const [user, setUser] = React.useState(null);
+
+  // Ahora necesitamos darle un valor a nuestro usuario
+  const login = ({ username }) => {
+    setUser({ username });
+  }
+
+  // De la misma forma, debemos poder cerrar la sesión
+  const logout = () => {
+    setUser(null);
+  }
+	...
+}
+
+```
+
+Ahora en LoginPage.js nuestro useAuth nos debe dar acceso al usuario y sus métodos:
+
+```js
+function LoginPage() {
+  const login = (e) => {
+    e.preventDefault();
+    auth.login({ username })
+  }
+}
+
+```
+
+Vamos de nuevo a auth.js y vamos a complementar la lógica:
+
+```js
+function AuthProvider({ children }) {
+  const navigate = useNavigate();
+
+  const login = ({ username }) => {
+    setUser({ username });
+		/* Ahora cada vez que hagamos login nos redireccionará a la 
+		página de profile */
+    navigate('/profile');
+  }
+
+  const logout = () => {
+		setUser(null);
+    /* Aquí haremos redirect a la página principal */
+    navigate('/');
+  }
+
+```
+
+Pero para esto debemos añadir el contexto de autentificación a LogoutPage.js:
+
+```js
+function LogoutPage() {
+  const auth = useAuth();
+
+  const logout = (e) => {
+    e.preventDefault();
+    auth.logout();
+  }
+}
+
+```
+
+Ahora en nuestra ProfilePage.js debemos completar esta lógica:
+
+```js
+import { useAuth } from '../../auth/auth';
+
+function ProfilePage() {
+  const auth = useAuth();
+
+  return (
+    /* Ahora si nosotros nos registramos deberíamos poder ver 
+		nuestro nombre de usuario en nuestra página de perfil */
+    <>
+      <h1>Perfil</h1>
+      <h1>Welcome {auth.user.username}</h1>
+    </>
+  );
+}
+
+```
+
+Y listo, ahora solo nos queda el que no podamos entrar a profile sino hasta que hayamos hecho login, lo cual haremos a continuación.
+
+___
