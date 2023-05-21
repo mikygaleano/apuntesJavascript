@@ -1,1 +1,1 @@
-# Apuntes de javascript
+# Apuntes
