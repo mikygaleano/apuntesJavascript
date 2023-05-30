@@ -743,3 +743,384 @@ function ProfilePage() {
 Y listo, ahora solo nos queda el que no podamos entrar a profile sino hasta que hayamos hecho login, lo cual haremos a continuación.
 
 ___
+
+## Menú con rutas públicas y privadas ##
+
+Ahora vamos a hacer que nuestro menú no muestre los enlaces para hacer es crear las validaciones de si un usuario NO está registrado, no deberíamos mostrar una página de logout o perfil, y si está registrado, entonces no deberíamos mostrar la pestaña de login.
+
+Para esto en nuestro menú debemos validar si tenemos un usuario registrado, o no:
+
+Main.js
+
+```js
+
+  /* En cada una de nuestras rutas vamos a crear una nueva propiedad 
+que se llame "private" que nos permita validár si cierta secciones 
+pública o privada */
+const routes = [];
+
+routes.push({
+  to: '/',
+  text: 'Home',
+  private: false,
+});
+routes.push({
+  to: '/blog',
+  text: 'Blog',
+  private: false,
+});
+routes.push({
+  to: '/profile',
+  text: 'Profile',
+  private: true,
+});
+
+routes.push({
+  to: '/login',
+  text: 'Login',
+  private: false,
+});
+
+routes.push({
+  to: '/logout',
+  text: 'Logout',
+  private: true,
+});
+
+
+```
+
+Teniendo esto ya podemos validar si renderizamos cierto componente o no lo hacemos; vamos entonces a crear la validación que nos permita lograr esto:
+
+```js
+  function Menu() {
+  const auth = useAuth();
+
+  return (
+    <nav>
+      <ul>
+
+        {/* cambiamos el return inferido por unas llaves y el 
+        return  */}
+        {routes.map(route => {
+          /* Este contenido se va a renderizar solo si se pasa la 
+          siguiente validación, si no estamos autenticados y  
+          tratamos de entrar a un a ruta privada entonces no vamos a 
+          renderizar esa ruta */
+          if (route.private && !auth.user) return null
+
+          return (
+            <li key={route.to}>
+              ...
+            </li>
+          );
+        })}
+
+      </ul>
+    </nav>
+  );
+}
+
+```
+
+Listo, ahora lo único de nos falta es que cuando estemos registrados, la manera que yo encontré es la siguiente:
+
+```js
+  function Menu() {
+	...
+	return (
+    <nav>
+      <ul>
+        {routes.map(route => {
+          ...
+          /* Validamos si hay un usuario registrado, y si el nombre 
+          de la ruta es igual a Login entonces retornamos un "null" */
+          if (auth.user && route.text === 'Login') return null
+
+          return (
+            <li key={route.to}>
+              ...
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+  );
+}
+
+```
+
+Ahora lo único que nos falta es que no podamos acceder a las rutas por medio de la barra de búsqueda con Hashes, ya que si accedemos a una ruta que no se renderiza la aplicación se rompe.
+
+___
+
+## Navigate y redirects: protegiendo rutas privadas ##
+
+Como mencionamos anteriormente, si un usuario intenta acceder a una ruta privada por medio del historial o la barra de búsqueda aún si esta no esta renderizada o no puede acceder lo que va a causar es que nuestra aplicación este en blanco, colapse y ya no se pueda interactuar hasta que recarguemos.
+
+Para solucionar esto lo que haremos es protegerlas de verdad haciendo que si intentan acceder a una ruta parvada haga un redirect al home, a login o a profile dependiendo de la ruta donde intente acceder.
+
+Para esto vamos primero a nuestro Profile.js:
+
+```js
+  // Importamos el componente navigate
+import { useAuth } from '../../auth/auth';
+
+function ProfilePage() {
+  const auth = useAuth();
+
+  /* Preguntamos si hay un usuario registrado, si no, redirigimos 
+	a la persona */ 
+  if (!auth.user) {
+    /* Con este componente podemos hacer el redirect hacia donde la 
+		lógica de nuestra aplicación lo requiera */ 
+    return <Navigate to="/login" />
+  }
+
+  return (
+    <>
+      <h1>Perfil</h1>
+      <h1>Welcome {auth.user.username}</h1>
+    </>
+  );
+}
+
+```
+
+De esta manera si no nos hemos registrado e intentamos acceder a Profile por medio de la barra de búsqueda nos redirigirá a nuestro login.
+
+En caso de que necesitemos redireccionar varias veces a distintos sitios de nuestra aplicación veremos que hacer esto puede ser un poco repetitivo, debemos solucionar esto.
+
+Vamos a auth.js y creemos una función que nos permita hacer esto más sencillo.
+
+```js
+  import { Navigate } from 'react-router-dom';
+
+...
+/* En este compoinente podemos hacer la validación que es la misma 
+que utilizamos con anterioridad */
+function AuthRoute(props) {
+  const auth = useAuth();
+
+  if (!auth.user) {
+    return <Navigate to="/login" />
+  }
+
+  return props.children
+}
+
+export {
+	...
+  AuthRoute,
+}
+
+```
+
+Luego simplemente implementamos este componente en el ProfilePage.js:
+
+```JS
+  import { AuthRoute, useAuth } from '../../auth/auth';
+
+function ProfilePage() {
+  const auth = useAuth();
+
+  return (
+    <AuthRoute>
+      <h1>Perfil</h1>
+      <h1>Welcome {auth.user.username}</h1>
+    </AuthRoute>
+  );
+}
+
+export { ProfilePage }
+
+```
+
+Si lo ejecutamos tendremos un error debido a que al renderizar el componente aún así lo redireccionemos como auth.user.username no existe y esto nos dará un error ya que en el componente lo estamos solicitando y esto nos genera un erro bloqueante al redireccionar a login.
+
+Pero para que funcione esto en nuestro llamado desde App.js debemos importar a este componente ProfilePage dentro de un componente AuthRoute:
+
+```JS
+  import { AuthProvider, useAuth, AuthRoute } from './Components/auth/auth'
+...
+
+function App() {
+  return (
+    <>
+      <HashRouter>
+        <AuthProvider>
+          <Routes>
+            ...
+            <Route path='/profile' 
+              element={
+                <AuthRoute>
+                  <ProfilePage /> {/* <-- */}
+                </AuthRoute>
+              } 
+            />
+          </Routes>
+        </AuthProvider>
+
+      </HashRouter>
+    </>
+  )
+}
+
+```
+
+Y nuestro componente ProfilePage.js lo podemos dejar como estaba:
+
+```JS
+  function ProfilePage() {
+  const auth = useAuth();
+
+  return (
+    <>
+      <h1>Perfil</h1>
+      <h1>Welcome {auth.user.username}</h1>
+    </>
+  );
+}
+
+```
+
+Ahora haremos lo mismo con el Logout en App.js:
+
+```JS
+  <Route path='/logout' 
+  element={
+    <AuthRoute>
+      <LogoutPage />
+    </AuthRoute>
+  } 
+/>
+
+```
+
+Lo único que nos queda por hacer es que cuando estemos autenticados no podamos acceder a la página de Login, porque estamos protegiendo las rutas privadas de un usuario público pero no la ruta pública de registro a un usuario privado. ¡Hagamos esto!
+
+LoginPage.js
+
+```JS
+  function LoginPage() {
+	...	
+
+  /* Como en este caso solo necesiamos hacer una validación lo 
+  haremos directo en el componente preguntando si el usuario ya esta 
+  registrado, si lo está lo redirigiremos a la página de Profile 
+  usando el Navigate */
+  if(auth.user) {
+    return <Navigate to="/profile" />
+  }
+
+  return (
+		...
+	)
+}
+
+```
+
+Y hemos terminado de proteger nuestras rutas y tener una mejor lógica de aplicación.
+
+___
+
+## Roles y permisos ##
+
+La autorización es la que le permite a los usuarios tener cierto tipo de roles que nos permiten saber a que permisos tenemos acceso en nuestra aplicación, actualizar información o borrarla, tener permisos solo de lectura de la información, poder subir información etc .
+
+Podemos tener distintos tipos de roles, por mencionar algunos pueden ser el administrador, moderadores, usuarios premiun o freemiun y demás.
+
+Para empezar a implementar esta lógica de autorización vamos a nuestro archivo auth.js:
+
+```JS
+  // Listas de Autorización
+const adminList = [
+  'RetaxMaster',
+  'freddier',
+  'juandc'
+];
+
+const AuthContext = React.createContext();
+
+function AuthProvider({ children }) {
+  /* Dentro de nuestra función de login veremos si el usuario a 
+  ingresar es administrador */
+  const login = ({ username }) => {
+    /* Esta es la validación para saber si el usuario que ingresa a 
+		la aplicación es administrador o no */
+    const isAdmin = adminList.find(admin => admin === username);
+    /* Ahora nuestros usuarios van a tener una propiedad para saber 
+		si son admis */
+    setUser({ username, isAdmin });
+    navigate('/profile');
+  }
+}
+
+```
+
+Ahora en nuestra aplicación vamos a crear los permisos que van a tener nuestros administradores.
+
+BlogPost.js
+
+```JS
+  import { useAuth } from '../../auth/auth';
+
+function BlogPost() {
+	...	
+
+  // Vamos a hacer uso de la autenticación
+  const auth = useAuth();
+
+	/* Aqui buscamos al momento de registrarnos si el usuario es parte 
+  de la lista de administradores */
+  const blogpost = blogdata.find( post => post.slug == slug );
+
+  return (
+    <>
+      ...
+      {/* Si nuestro usuario existe y es admin vamos a renderizar 
+      este botón */}
+      {auth.user?.isAdmin && (
+        <button>Eliminar blogpost</button>
+      )} 
+    </>
+  );
+}
+
+```
+
+Ahora si entramos a alguno de los BlogPost con el nombre de algún administrador vamos a poder ver renderizado nuestro botón de eliminar BloPost.
+
+Ya tenemos la lógica para mostrar contenido dependiendo del rol.
+
+Ahora si vemos los blogpost que tienen autores, digamos que el autor del blog desea eliminarlo, pero ¿como lo va a hacer?
+
+Vamos a crear la lógica para que los autores del contenido puedan eliminar sus propios Blogs.
+
+```JS
+  function BlogPost() {
+  ...
+
+  /* Aquí validaremos si al acceder al blog soy el autor del blog y 
+	pueda eliminarlo o tenga el rol de administrador para ello */
+  const canDelete = auth.user?.isAdmin || blogpost.author === auth.user?.username;
+
+  const returnToBlog = () => {
+    navigate('/blog');
+  }
+  
+  return (
+    <>
+      ...
+
+      {/* Ahora vamos a preguntar si puedo borrar el BlogPost*/}
+      {canDelete && (
+        <button>Eliminar blogpost</button>
+      )} 
+    </>
+  );
+}
+
+```
+
+Ahora en caso de que seamos lo autores del Blog podemos eliminarlo, super fácil.
