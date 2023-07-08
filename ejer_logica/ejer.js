@@ -119,7 +119,31 @@ function palindromo(txt) {
     Escribe una función que genere los primeros n números de la secuencia de Fibonacci.
 */
 
-
+function fibonacci(n) {
+    // Verificar si n es válido
+    if (n <= 0) {
+      return [];
+    }
+  
+    // Casos base
+    let fibSeq = [0];
+    if (n === 1) {
+      return fibSeq;
+    }
+  
+    fibSeq = [0, 1];
+    if (n === 2) {
+      return fibSeq;
+    }
+  
+    // Generar la secuencia de Fibonacci
+    while (fibSeq.length < n) {
+        const nextNum = fibSeq[fibSeq.length - 1] + fibSeq[fibSeq.length - 2];
+        fibSeq.push(nextNum);
+    }
+    console.log('Fibonacci: =>>>>>>>>>')
+    return fibSeq;
+  }
 
 
 
@@ -163,7 +187,8 @@ function main () {
     console.log(ordenamiento_burbuja([5, 1, 4, 3, 18, 24, 21, 100, 85]));
     console.log(ordenamiento_quicksort(['a', 'c', 'z', 'b']));
     console.log(invertir_cadena('Hola mundo!!'));
-    console.log(palindromo('Hola'))
+    console.log(palindromo('Hola'));
+    console.log(fibonacci(100));
 };
 
 main();
