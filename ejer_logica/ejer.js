@@ -33,8 +33,6 @@ function es_primo(num) {
 };
 
 
-
-
 /*
     Ejercicio de ordenamiento:
     Implementa un algoritmo de ordenamiento,
@@ -46,7 +44,7 @@ function ordenamiento_burbuja(lista) {
   for (let i = 0; i <= lista.length -1; i++) {
     //console.log(`ES I: ${i}`)
     // bucle interno j, recorre la lista de 0 hasta el penultipo elemento de la lista no ordenada
-    for (let j = 0; j <= lista.length - i; j++) {
+    for (let j = 0; j <= lista.length - i - 1; j++) {
 
         // guarda el valor del elemento actual en una variable auxiliar
         aux = lista[j];
@@ -64,10 +62,32 @@ function ordenamiento_burbuja(lista) {
     }
   };
   return lista;
-}
+};
 
+function ordenamiento_quicksort(lista) {
+    if (lista <= 1) return lista; // si la lista es menor a 1 elemento o tiene un elemento, entonces ya esta ordenada
+    else {
+        const pivote = lista[0]; // le asignamos al pivote el valor del primer elemento de la lista
+        const menores = []; // lista donde se van a agregar los elementos menores al pivote
+        const mayores = []; // lista donde se van a agregar los elementos mayores al pivote
 
+        for (let i = 1; i < lista.length; i++) {
+            if (lista[i] < pivote) {
+                menores.push(lista[i]); // agregamos a menores si lista[i] es menor al pivote
+            } else {
+                mayores.push(lista[i]); // agregamos a mayores si lista[i] es mayor al pivote
+            };
+        };
 
+        // aplicamos recursividad para ordenar las sublistas menores y mayores
+        const subMenores = ordenamiento_quicksort(menores);
+        const subMayores = ordenamiento_quicksort(mayores);
+
+        // combinamos las sublistas ordenadas junto con el pivote en el medio
+        return subMenores.concat(pivote, subMayores);
+
+    };
+};
 
 /*
     Ejercicio de inversión de cadena:
@@ -75,7 +95,9 @@ function ordenamiento_burbuja(lista) {
     Por ejemplo, "Hola, mundo" se convertiría en "odnum ,aloH".
 */
 
-
+function invertir_cadena(cadena) {
+    return cadena.split('').reverse().join('');
+};
 
 
 /*
@@ -84,7 +106,11 @@ function ordenamiento_burbuja(lista) {
     Un palíndromo es una palabra o frase que se lee igual de adelante hacia atrás.
 */
 
-
+function palindromo(txt) {
+    return txt === invertir_cadena(txt)?
+                    `La palabra ${txt} Si es palindromo!! ${invertir_cadena(txt)}`:
+                    `La palabra ${txt} No es palindromo`;
+};
 
 
 
@@ -134,9 +160,11 @@ function ordenamiento_burbuja(lista) {
 function main () {
     console.log(sum_pares());
     console.log(es_primo(5));
-    console.log(ordenamiento_burbuja([5, 1, 4, 3, 18, 24, 21, 100, 85]))
-
+    console.log(ordenamiento_burbuja([5, 1, 4, 3, 18, 24, 21, 100, 85]));
+    console.log(ordenamiento_quicksort(['a', 'c', 'z', 'b']));
+    console.log(invertir_cadena('Hola mundo!!'));
+    console.log(palindromo('Hola'))
 };
 
-main()
+main();
 
