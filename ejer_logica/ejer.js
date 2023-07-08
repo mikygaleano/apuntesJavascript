@@ -89,6 +89,10 @@ function ordenamiento_quicksort(lista) {
     };
 };
 
+function ordenamiento3(lista) {
+    return lista.sort((a, b) => a - b)
+}
+
 /*
     Ejercicio de inversión de cadena:
     Escribe una función que invierta una cadena de texto.
@@ -98,6 +102,15 @@ function ordenamiento_quicksort(lista) {
 function invertir_cadena(cadena) {
     return cadena.split('').reverse().join('');
 };
+
+function invertir_cadena2(cadena) {
+    let invertir = '';
+    let separar = cadena.split('');
+    for (let i = 0; i < separar.length; i++) {
+        invertir += separar[separar.length - 1 - i]
+    }
+    return invertir;
+}
 
 
 /*
@@ -111,6 +124,7 @@ function palindromo(txt) {
                     `La palabra ${txt} Si es palindromo!! ${invertir_cadena(txt)}`:
                     `La palabra ${txt} No es palindromo`;
 };
+
 
 
 
@@ -186,7 +200,9 @@ function main () {
     console.log(es_primo(5));
     console.log(ordenamiento_burbuja([5, 1, 4, 3, 18, 24, 21, 100, 85]));
     console.log(ordenamiento_quicksort(['a', 'c', 'z', 'b']));
+    console.log(ordenamiento3([10, 8, 12, 15, 5, 3]))
     console.log(invertir_cadena('Hola mundo!!'));
+    console.log(invertir_cadena2('Hola mundo!!'));
     console.log(palindromo('Hola'));
     console.log(fibonacci(100));
 };
