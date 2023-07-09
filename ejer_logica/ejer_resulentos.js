@@ -243,7 +243,24 @@ function busqueda_binaria(lista, x) {
     es decir, si contienen las mismas letras pero en un orden diferente.
 */
 
+function anagramas(txt1, txt2) {
+    // Eliminar espacios en blanco y convertir a minúsculas
+    txt1 = txt1.replace(/\s/g, '').toLowerCase();
+    txt2 = txt2.replace(/\s/g, '').toLowerCase();
 
+    // Verificar si las cadenas tienen la misma longitud
+    if (txt1.length !== txt2.length) {
+        return false;
+    };
+
+    // convierto las cadenas en array, las ordeno y las vuelvo a convertir en una cadena
+    txt1 = txt1.split('').sort().join('');
+    txt2 = txt2.split('').sort().join('');
+
+    // por ultimo devuelvo true si son iguales o false si no
+    return txt1 === txt2;
+
+}
 
 
 
@@ -267,6 +284,7 @@ function main () {
     console.log(busqueda_binaria(ordenamiento_quicksort([5, 1, 4, 3, 18, 24, 21, 100, 85]), 2));
     console.log(factorial(4));
     console.log(factorial2(4));
+    console.log(anagramas('mono', 'nomo'));
 };
 
 main();
