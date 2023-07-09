@@ -174,6 +174,24 @@ function fibonacci(n) {
     Implementa una función de búsqueda binaria para encontrar un elemento en una lista ordenada.
 */
 
+function busqueda_binaria(lista, x) {
+    let low = 0;
+    let high = lista.length - 1;
+
+    while (low <= high) {
+        let mid = Math.floor((low + high) / 2); // redondeo la ubicación de la mitad de la lista
+
+        if (lista[mid] === x) {
+            return true; // El elemento se encontró en la lista
+        } else if (lista[mid] < x) {
+            low = mid + 1; // El elemento buscado está en la mitad superior
+        } else {
+            high = mid - 1; // El elemento buscado está en la mitad inferior
+        }
+    }
+
+    return false; // El elemento no se encontró en la lista
+}
 
 
 
@@ -205,6 +223,7 @@ function main () {
     console.log(invertir_cadena2('Hola mundo!!'));
     console.log(palindromo('Hola'));
     console.log(fibonacci(100));
+    console.log(busqueda_binaria(ordenamiento_quicksort([5, 1, 4, 3, 18, 24, 21, 100, 85]), 2))
 };
 
 main();
