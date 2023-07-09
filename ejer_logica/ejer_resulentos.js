@@ -165,6 +165,47 @@ function fibonacci(n) {
     Ejercicio de recursividad:
     Implementa una función recursiva para calcular el factorial de un número.
 */
+function factorial(n) {
+    if (n === 0) {
+        return 1;
+    } else {
+        return n * factorial(n - 1);
+    };
+    /*
+        Es importante tener en cuenta que la recursividad requiere un caso base
+        (en este caso, n === 0) que detenga la recursión y evite un bucle infinito.
+        Además, es fundamental que en cada llamada recursiva se acerque al caso base
+        para garantizar que la recursión se complete correctamente.
+        Veamos un ejemplo con el número 4 para entender mejor el proceso:
+
+        Llamada inicial: factorial(4)
+        4 no es igual a 0, por lo que se ejecuta la parte else de la declaración condicional.
+        Se realiza una llamada recursiva a factorial(3) y se espera su resultado.
+        3 no es igual a 0, por lo que se ejecuta la parte else de la declaración condicional.
+        Se realiza una llamada recursiva a factorial(2) y se espera su resultado.
+        2 no es igual a 0, por lo que se ejecuta la parte else de la declaración condicional.
+        Se realiza una llamada recursiva a factorial(1) y se espera su resultado.
+        1 no es igual a 0, por lo que se ejecuta la parte else de la declaración condicional.
+        Se realiza una llamada recursiva a factorial(0) y se espera su resultado.
+        0 es igual a 0, por lo que se alcanza el caso base.
+        Se devuelve 1 desde la llamada factorial(0).
+        Ahora, las llamadas recursivas empiezan a resolverse en reversa:
+
+        El resultado de factorial(0) es 1. Por lo tanto, factorial(1) se evalúa como 1 * 1, lo cual es 1.
+        El resultado de factorial(1) es 1. Por lo tanto, factorial(2) se evalúa como 2 * 1, lo cual es 2.
+        El resultado de factorial(2) es 2. Por lo tanto, factorial(3) se evalúa como 3 * 2, lo cual es 6.
+        El resultado de factorial(3) es 6. Por lo tanto, factorial(4) se evalúa como 4 * 6, lo cual es 24.
+        Finalmente, el resultado final de la llamada inicial factorial(4) es 24, que es el factorial de 4.
+    */
+};
+
+function factorial2(n) {
+    let result = 1;
+    for (let i = 2; i <= n; i++) {
+        result *= i;
+    }
+    return result;
+}
 
 
 
@@ -223,7 +264,9 @@ function main () {
     console.log(invertir_cadena2('Hola mundo!!'));
     console.log(palindromo('Hola'));
     console.log(fibonacci(100));
-    console.log(busqueda_binaria(ordenamiento_quicksort([5, 1, 4, 3, 18, 24, 21, 100, 85]), 2))
+    console.log(busqueda_binaria(ordenamiento_quicksort([5, 1, 4, 3, 18, 24, 21, 100, 85]), 2));
+    console.log(factorial(4));
+    console.log(factorial2(4));
 };
 
 main();
