@@ -234,6 +234,9 @@ function busqueda_binaria(lista, x) {
     return false; // El elemento no se encontró en la lista
 }
 
+function busqueda(lista, x) {
+    return lista.filter(el => el === x);
+}
 
 
 
@@ -282,6 +285,7 @@ function main () {
     console.log(palindromo('Hola'));
     console.log(fibonacci(100));
     console.log(busqueda_binaria(ordenamiento_quicksort([5, 1, 4, 3, 18, 24, 21, 100, 85]), 2));
+    console.log(busqueda([5, 1, 4, 3, 18, 24, 21, 100, 85], 4))
     console.log(factorial(4));
     console.log(factorial2(4));
     console.log(anagramas('mono', 'nomo'));
